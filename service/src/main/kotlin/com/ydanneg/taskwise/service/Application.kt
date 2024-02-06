@@ -1,4 +1,4 @@
-package com.ydanneg.springboot.service
+package com.ydanneg.taskwise.service
 
 import org.springframework.boot.Banner.Mode.OFF
 import org.springframework.boot.WebApplicationType.REACTIVE
@@ -12,6 +12,5 @@ fun main(args: Array<String>) {
     runApplication<Application>(*args) {
         webApplicationType = REACTIVE
         setBannerMode(OFF)
-        setLazyInitialization(true)
     }
 }

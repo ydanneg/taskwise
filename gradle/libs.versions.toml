@@ -15,7 +15,9 @@ springboot-starter-security = { module = "org.springframework.boot:spring-boot-s
 springboot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 springboot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 springboot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
+springboot-docker-compose = { module = "org.springframework.boot:spring-boot-docker-compose" }
 
+spring-data-commons = { module = "org.springframework.data:spring-data-commons" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" }
 

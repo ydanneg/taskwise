@@ -1,0 +1,16 @@
+### Create a new task
+POST http://localhost:8080/v1/users/ydanneg/tasks
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "task #1",
+  "description": "string",
+  "dueDate": "2024-02-06",
+  "priority": "LOW",
+  "assignedTo": "ydanneg"
+}
+
+### Get task by ID
+GET http://localhost:8080/v1/users/ydanneg/tasks
+Accept: application/json

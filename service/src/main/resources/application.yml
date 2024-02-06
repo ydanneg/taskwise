@@ -9,33 +9,55 @@ management:
         include: health, info
       base-path: /
 
-#springdoc:
-#  remove-broken-reference-definitions: false
-#  default-consumes-media-type: application/json
-#  show-actuator: false
-#  webjars:
-#    prefix: /webjars
-#  swagger-ui:
-#    display-operation-id: true
-#    display-request-duration: true
-#    disable-swagger-default-url: true
-#    deep-linking: true
-#    try-it-out-enabled: false
-#    persist-authorization: true
-#    doc-expansion: none
-#    default-models-expand-depth: 4
-#    default-model-expand-depth: 4
-#    groups-order: DESC
-#    enabled: true
-#    path: /swagger-ui
-#    operations-sorter: alpha
-#    tags-sorter: alpha
-#
-#  api-docs:
-#    path: /api-docs
-#    enabled: true
-#    groups:
-#      enabled: true
+spring:
+  docker:
+    compose:
+      file: service/docker-compose.yaml
+      lifecycle-management: start_and_stop
+      start:
+        command: up
+      stop:
+        command: down
+      skip:
+        in-tests: false
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/tasks
+    username: dbuser
+    password: dbpassword
+  flyway:
+    enabled: true
+    user: dbuser
+    password: dbpassword
+    url: jdbc:postgresql://localhost:5432/tasks
+
+springdoc:
+  remove-broken-reference-definitions: false
+  default-consumes-media-type: application/json
+  show-actuator: false
+  webjars:
+    prefix: /webjars
+  swagger-ui:
+    display-operation-id: true
+    display-request-duration: true
+    disable-swagger-default-url: true
+    deep-linking: true
+    try-it-out-enabled: false
+    persist-authorization: true
+    doc-expansion: none
+    default-models-expand-depth: 4
+    default-model-expand-depth: 4
+    groups-order: DESC
+    enabled: true
+    path: /swagger-ui
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+  api-docs:
+    path: /api-docs
+    enabled: true
+    groups:
+      enabled: true
 
 logging:
   level:

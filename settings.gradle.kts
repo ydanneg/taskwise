@@ -1,4 +1,4 @@
-rootProject.name = "spring-boot-kotlin-gradle"
+rootProject.name = "taskwise"
 
 include(":model")
 include(":service")

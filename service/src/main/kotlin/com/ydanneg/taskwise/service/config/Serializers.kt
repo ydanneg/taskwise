@@ -1,4 +1,4 @@
-package com.ydanneg.springboot.service.config
+package com.ydanneg.taskwise.service.config
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
