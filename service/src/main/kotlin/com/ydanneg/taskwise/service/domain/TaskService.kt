@@ -18,19 +18,19 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class TaskService(
-    val taskRepository: TaskRepository
-) {
+@Transactional(readOnly = true)
+class TaskService(val taskRepository: TaskRepository) {
 
-    @Transactional(readOnly = true)
     suspend fun getAllTasks(pageRequest: Pageable): Page<Task> =
         taskRepository.findBy(pageRequest)
             .map { it.toModel() }
             .toList()
             .let { PageImpl(it, pageRequest, taskRepository.count()) }
 
-    @Transactional(readOnly = true)
     suspend fun getTask(taskId: UUID): Task = getOrThrow(taskId).toModel()
+
+    @Transactional
+    suspend fun deleteTask(taskId: UUID) = taskRepository.deleteById(taskId)
 
     @Transactional
     suspend fun createTask(
@@ -53,26 +53,52 @@ class TaskService(
         return taskRepository.save(entity).toModel()
     }
 
-    private suspend fun getOrThrow(taskId: UUID): TaskEntity =
-        taskRepository.findById(taskId) ?: throw TaskNotFoundException(taskId.toString())
-
     @Transactional
     suspend fun updateTaskStatus(taskId: UUID, status: TaskStatus): Task =
-        getOrThrow(taskId)
-            .copy(status = status)
-            .let {
+        updateTask(taskId) {
+            copy(status = status).let {
                 if (status == TaskStatus.COMPLETED) it.copy(completedAt = Instant.now())
                 else it.copy(completedAt = null)
             }
-            .let { taskRepository.save(it) }
-            .toModel()
+        }
 
-    @Transactional
-    suspend fun getUserAssignedTasks(userId: String, pageRequest: Pageable): Page<Task> =
-        taskRepository.findByAssignedTo(userId, pageRequest)
+    suspend fun getUserAssignedTasks(userId: String, pageRequest: Pageable): Page<Task> {
+        val total = taskRepository.countByAssignedToOrCreatedBy(userId, userId)
+        return taskRepository.findByAssignedToOrCreatedBy(userId, userId, pageRequest)
             .map { it.toModel() }
             .toList()
-            .let { PageImpl(it, pageRequest, taskRepository.countByAssignedTo(userId)) }
+            .let { PageImpl(it, pageRequest, total) }
+    }
+
+    @Transactional
+    suspend fun updateTaskTitle(taskId: UUID, title: String): Task =
+        updateTask(taskId) { copy(title = title) }
+
+    @Transactional
+    suspend fun updateTaskDescription(taskId: UUID, description: String?): Task =
+        updateTask(taskId) { copy(description = description) }
+
+    @Transactional
+    suspend fun updateTaskPriority(taskId: UUID, priority: TaskPriority): Task =
+        updateTask(taskId) { copy(priority = priority) }
+
+    @Transactional
+    suspend fun updateTaskAssignee(taskId: UUID, assignee: String?): Task =
+        updateTask(taskId) { copy(assignedTo = assignee) }
+
+    @Transactional
+    suspend fun updateTaskDueDate(taskId: UUID, dueDate: LocalDate?): Task =
+        updateTask(taskId) { copy(dueDate = dueDate) }
+
+    private suspend fun getOrThrow(taskId: UUID): TaskEntity =
+        taskRepository.findById(taskId) ?: throw TaskNotFoundException(taskId.toString())
+
+    private suspend fun updateTask(taskId: UUID, update: TaskEntity.() -> TaskEntity): Task {
+        return getOrThrow(taskId)
+            .update()
+            .let { taskRepository.save(it) }
+            .toModel()
+    }
 
     private fun TaskEntity.toModel() = Task(
         id = id.toString(),

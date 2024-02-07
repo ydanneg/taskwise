@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.springframework.cloud.openfeign.support.PageJacksonModule
 import org.springframework.cloud.openfeign.support.SortJacksonModule
@@ -22,6 +23,8 @@ import org.springframework.http.codec.json.KotlinSerializationJsonEncoder
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
+import java.time.Instant
+import java.time.format.DateTimeFormatterBuilder
 
 
 @Configuration
@@ -49,14 +52,18 @@ class ApplicationConfig : WebFluxConfigurer {
     }
 
     @Bean
-    fun objectMapper(): ObjectMapper = ObjectMapper()
-        .registerKotlinModule()
-        .registerModule(Jdk8Module())
-        .registerModule(JavaTimeModule())
-        .registerModule(PageJacksonModule())
-        .registerModule(SortJacksonModule())
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
+    fun objectMapper(): ObjectMapper {
+        val toFormatter = DateTimeFormatterBuilder().appendInstant(3).toFormatter()
+        val instantSerializer = object : InstantSerializer(INSTANCE, false, false, toFormatter) {}
+        return ObjectMapper()
+            .registerKotlinModule()
+            .registerModule(Jdk8Module())
+            .registerModule(JavaTimeModule().addSerializer(Instant::class.java, instantSerializer))
+            .registerModule(PageJacksonModule())
+            .registerModule(SortJacksonModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
+    }
 
 }
