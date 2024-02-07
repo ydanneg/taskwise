@@ -4,6 +4,7 @@ import com.ydanneg.taskwise.model.CreateTaskRequest
 import com.ydanneg.taskwise.model.Task
 import com.ydanneg.taskwise.service.domain.TaskService
 import com.ydanneg.taskwise.service.web.V1Constants
+import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -25,7 +26,7 @@ class UserTaskController(private val taskService: TaskService) {
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun createTask(
         @PathVariable userId: String,
-        @RequestBody request: CreateTaskRequest
+        @Valid @RequestBody request: CreateTaskRequest
     ): Task = taskService.createTask(
         userId = userId,
         title = request.title,

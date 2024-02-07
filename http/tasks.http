@@ -4,8 +4,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "title": "task #1",
-  "description": "string",
+  "title": "Task #1",
+  "description": "Description of a task",
   "dueDate": "2024-02-06",
   "priority": "LOW",
   "assignedTo": "ydanneg"

@@ -5,7 +5,7 @@ import com.ydanneg.taskwise.model.TaskPriority
 import com.ydanneg.taskwise.model.TaskStatus
 import com.ydanneg.taskwise.service.data.TaskEntity
 import com.ydanneg.taskwise.service.data.TaskRepository
-import com.ydanneg.taskwise.service.web.TaskNotFoundException
+import com.ydanneg.taskwise.service.web.ServiceException.TaskNotFoundException
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take

@@ -4,6 +4,7 @@ import com.ydanneg.taskwise.model.Task
 import com.ydanneg.taskwise.model.UpdateTaskStatusRequest
 import com.ydanneg.taskwise.service.domain.TaskService
 import com.ydanneg.taskwise.service.web.V1Constants
+import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -31,7 +32,7 @@ class TaskController(private val taskService: TaskService) {
     @ResponseStatus(OK)
     suspend fun updateTaskStatus(
         @PathVariable taskId: String,
-        @RequestBody request: UpdateTaskStatusRequest
+        @Valid @RequestBody request: UpdateTaskStatusRequest
     ): Task = taskService.updateTaskStatus(UUID.fromString(taskId), request.status)
 
     @GetMapping

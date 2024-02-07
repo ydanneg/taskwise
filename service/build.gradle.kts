@@ -38,6 +38,7 @@ dependencies {
     implementation(myLibs.kotlin.reflect)
     implementation(myLibs.spring.data.commons)
 
+    testImplementation("org.springframework.boot:spring-boot-starter-validation")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:r2dbc")
