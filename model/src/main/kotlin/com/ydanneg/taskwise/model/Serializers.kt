@@ -10,14 +10,21 @@ import kotlinx.serialization.encoding.Encoder
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.format.ResolverStyle
 
 
 @Serializer(forClass = Instant::class)
 object KInstantSerializer : KSerializer<Instant> {
+    private val formatter = DateTimeFormatterBuilder()
+        .parseCaseInsensitive()
+        .appendInstant(3)
+        .toFormatter()
+
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", STRING)
 
     override fun serialize(encoder: Encoder, value: Instant) {
-        encoder.encodeString(DateTimeFormatter.ISO_INSTANT.format(value))
+        encoder.encodeString(formatter.format(value))
     }
 
     override fun deserialize(decoder: Decoder): Instant = Instant.parse(decoder.decodeString())
