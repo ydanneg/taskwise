@@ -1,5 +1,7 @@
 package com.ydanneg.taskwise.service.web
 
+import io.kotest.matchers.shouldBe
+import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec
@@ -26,4 +28,12 @@ inline fun <reified T> WebTestClient.assertGet(uri: String, block: ResponseSpec.
         .also(block)
         .expectBody(T::class.java)
         .returnResult().responseBody!!
+}
+
+
+fun Page<*>.assertPage(total: Int) {
+    totalPages shouldBe total / V1Constants.DEFAULT_PAGE_SIZE + 1
+    totalElements shouldBe total
+    size shouldBe V1Constants.DEFAULT_PAGE_SIZE
+    content.size shouldBe total.coerceAtMost(V1Constants.DEFAULT_PAGE_SIZE)
 }

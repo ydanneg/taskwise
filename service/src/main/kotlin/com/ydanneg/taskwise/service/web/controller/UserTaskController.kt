@@ -39,7 +39,7 @@ class UserTaskController(private val taskService: TaskService) {
     @GetMapping
     suspend fun getUserAssignedTasks(
         @PathVariable userId: String,
-        @ParameterObject @PageableDefault(size = 20, page = 0) pageRequest: Pageable
+        @ParameterObject @PageableDefault(size = V1Constants.DEFAULT_PAGE_SIZE, page = 0) pageRequest: Pageable
     ): Page<Task> =
         taskService.getUserAssignedTasks(userId, pageRequest)
 }

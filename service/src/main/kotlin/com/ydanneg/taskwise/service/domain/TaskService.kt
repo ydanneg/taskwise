@@ -6,9 +6,7 @@ import com.ydanneg.taskwise.model.TaskStatus
 import com.ydanneg.taskwise.service.data.TaskEntity
 import com.ydanneg.taskwise.service.data.TaskRepository
 import com.ydanneg.taskwise.service.web.ServiceException.TaskNotFoundException
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -24,10 +22,9 @@ class TaskService(
     val taskRepository: TaskRepository
 ) {
 
+    @Transactional(readOnly = true)
     suspend fun getAllTasks(pageRequest: Pageable): Page<Task> =
-        taskRepository.findAll()
-            .drop(pageRequest.pageSize * pageRequest.pageNumber)
-            .take(pageRequest.pageSize)
+        taskRepository.findBy(pageRequest)
             .map { it.toModel() }
             .toList()
             .let { PageImpl(it, pageRequest, taskRepository.count()) }
@@ -72,9 +69,7 @@ class TaskService(
 
     @Transactional
     suspend fun getUserAssignedTasks(userId: String, pageRequest: Pageable): Page<Task> =
-        taskRepository.findByAssignedTo(userId)
-            .drop(pageRequest.pageSize * pageRequest.pageNumber)
-            .take(pageRequest.pageSize)
+        taskRepository.findByAssignedTo(userId, pageRequest)
             .map { it.toModel() }
             .toList()
             .let { PageImpl(it, pageRequest, taskRepository.countByAssignedTo(userId)) }

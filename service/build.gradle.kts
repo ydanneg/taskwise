@@ -37,12 +37,9 @@ dependencies {
     implementation(myLibs.kotlinx.coroutines.reactor)
     implementation(myLibs.kotlin.reflect)
     implementation(myLibs.spring.data.commons)
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0") // page/sort encoders
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-validation")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:r2dbc")
-    testImplementation("org.testcontainers:postgresql")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.flywaydb:flyway-core")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
@@ -50,6 +47,11 @@ dependencies {
 
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.postgresql:r2dbc-postgresql")
+
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:r2dbc")
+    testImplementation("org.testcontainers:postgresql")
 
     testImplementation(myLibs.kotest.assertions.core)
     testImplementation(myLibs.springboot.starter.test) {

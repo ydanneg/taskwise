@@ -6,10 +6,12 @@ import com.ydanneg.taskwise.model.ErrorDto
 import com.ydanneg.taskwise.model.Task
 import com.ydanneg.taskwise.service.web.V1Constants
 import com.ydanneg.taskwise.service.web.assertGet
+import com.ydanneg.taskwise.service.web.assertPage
 import com.ydanneg.taskwise.service.web.assertPost
 import com.ydanneg.taskwise.test.SpringBootIntegrationTest
 import io.kotest.matchers.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.util.UUID
 import kotlin.test.Test
@@ -49,6 +51,20 @@ class TaskControllerTest : BaseTestContainerTest() {
         client.assertGet<ErrorDto>(V1Constants.taskByIdUri(taskId)) {
             expectStatus().isNotFound
         } shouldBe expected
+    }
+
+    @Test
+    fun `get all tasks page`() {
+        val total = 30
+        for (i in 1..total) {
+            client.assertPost<Task>(V1Constants.userTasksUri("user1"), CreateTaskRequest("Task #$i")) {
+                expectStatus().isCreated
+            }
+        }
+
+        client.assertGet<Page<Task>>(V1Constants.TASKS) {
+            expectStatus().isOk
+        }.assertPage(total)
     }
 
 }

@@ -36,6 +36,6 @@ class TaskController(private val taskService: TaskService) {
     ): Task = taskService.updateTaskStatus(UUID.fromString(taskId), request.status)
 
     @GetMapping
-    suspend fun getAllTasks(@ParameterObject @PageableDefault(size = 20, page = 0) pageRequest: Pageable): Page<Task> =
+    suspend fun getAllTasks(@ParameterObject @PageableDefault(size = V1Constants.DEFAULT_PAGE_SIZE, page = 0) pageRequest: Pageable): Page<Task> =
         taskService.getAllTasks(pageRequest)
 }
