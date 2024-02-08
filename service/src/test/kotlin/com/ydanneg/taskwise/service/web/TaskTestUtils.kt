@@ -32,6 +32,14 @@ inline fun <reified T> WebTestClient.assertPut(uri: String, request: Any, block:
         .returnResult().responseBody!!
 }
 
+fun WebTestClient.assertDelete(uri: String) {
+    delete()
+        .uri(uri)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus().isNoContent
+}
+
 inline fun <reified T> WebTestClient.assertGet(uri: String, block: ResponseSpec.() -> Unit): T {
     return get()
         .uri(uri)

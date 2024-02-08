@@ -14,6 +14,7 @@ import com.ydanneg.taskwise.model.UpdateTaskPriorityRequest
 import com.ydanneg.taskwise.model.UpdateTaskStatusRequest
 import com.ydanneg.taskwise.model.UpdateTaskTitleRequest
 import com.ydanneg.taskwise.service.web.V1Constants
+import com.ydanneg.taskwise.service.web.assertDelete
 import com.ydanneg.taskwise.service.web.assertGet
 import com.ydanneg.taskwise.service.web.assertPage
 import com.ydanneg.taskwise.service.web.assertPost
@@ -99,6 +100,15 @@ class TaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : Base
             expectStatus().isOk
         }.apply {
             status shouldBe TaskStatus.COMPLETED
+        }
+    }
+
+    @Test
+    fun `should delete task`() {
+        val task = createTask()
+        client.assertDelete(V1Constants.taskByIdUri(task.id))
+        client.assertGet<Any>(V1Constants.taskByIdUri(task.id)) {
+            expectStatus().isNotFound
         }
     }
 

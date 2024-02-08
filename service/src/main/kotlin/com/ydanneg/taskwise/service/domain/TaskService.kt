@@ -24,24 +24,22 @@ import java.util.UUID
 
 @Service
 @Transactional(readOnly = true)
-class TaskService(
-    val mongoTemplate: ReactiveMongoTemplate
-) {
+class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
 
     suspend fun getAllTasks(pageRequest: Pageable): Page<Task> {
-        return mongoTemplate.find(Query().with(pageRequest), TaskEntity::class.java)
+        val query = Query()
+        return mongoTemplate.find(query.with(pageRequest), TaskEntity::class.java)
             .map { it.toModel() }
             .asFlow()
             .toList()
-            .let { PageImpl(it, pageRequest, mongoTemplate.count(Query(), TaskEntity::class.java).awaitSingle()) }
+            .let { PageImpl(it, pageRequest, mongoTemplate.count(query, TaskEntity::class.java).awaitSingle()) }
     }
 
     suspend fun getTask(taskId: UUID): Task = getOrThrow(taskId).toModel()
 
     @Transactional
-    suspend fun deleteTask(taskId: UUID): TaskEntity? {
-        val query = Query(Criteria.where("id").`is`(taskId))
-        return mongoTemplate.findAndRemove(query, TaskEntity::class.java).awaitSingle()
+    suspend fun deleteTask(taskId: UUID) {
+        mongoTemplate.remove(getOrThrow(taskId)).awaitSingle()
     }
 
     @Transactional
@@ -114,17 +112,4 @@ class TaskService(
             .let { mongoTemplate.save(it).awaitSingle() }
             .toModel()
     }
-
-    private fun TaskEntity.toModel() = Task(
-        id = id.toString(),
-        title = title,
-        description = description,
-        status = status,
-        priority = priority,
-        dueDate = dueDate,
-        assignedTo = assignedTo,
-        createdAt = createdAt!!,
-        createdBy = createdBy,
-        completedAt = completedAt
-    )
 }
