@@ -13,7 +13,6 @@ import com.ydanneg.taskwise.model.UpdateTaskDueDateRequest
 import com.ydanneg.taskwise.model.UpdateTaskPriorityRequest
 import com.ydanneg.taskwise.model.UpdateTaskStatusRequest
 import com.ydanneg.taskwise.model.UpdateTaskTitleRequest
-import com.ydanneg.taskwise.service.data.TaskRepository
 import com.ydanneg.taskwise.service.web.V1Constants
 import com.ydanneg.taskwise.service.web.assertGet
 import com.ydanneg.taskwise.service.web.assertPage
@@ -24,13 +23,14 @@ import com.ydanneg.taskwise.test.SpringBootIntegrationTest
 import io.kotest.matchers.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 
 @SpringBootIntegrationTest
-class TaskControllerTest(@Autowired taskRepository: TaskRepository) : BaseTestContainerTest(taskRepository) {
+class TaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : BaseTestContainerTest(mongoTemplate) {
 
     @Autowired
     private lateinit var client: WebTestClient

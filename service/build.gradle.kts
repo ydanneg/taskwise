@@ -39,20 +39,24 @@ dependencies {
     implementation(myLibs.spring.data.commons)
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0") // page/sort encoders
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+//    implementation("org.springframework.data:spring-data-mongodb-reactive")
+//    implementation("org.springframework.data:spring-data-mongodb")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.flywaydb:flyway-core")
+//    implementation("org.flywaydb:flyway-core")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+//    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
 
-    runtimeOnly("org.postgresql:postgresql")
-    implementation("org.postgresql:r2dbc-postgresql")
+//    runtimeOnly("org.postgresql:postgresql")
+//    implementation("org.postgresql:r2dbc-postgresql")
 
     testImplementation("org.apache.commons:commons-lang3")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:r2dbc")
-    testImplementation("org.testcontainers:postgresql")
+//    testImplementation("org.testcontainers:r2dbc")
+//    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:mongodb")
 
     testImplementation(myLibs.kotest.assertions.core)
     testImplementation(myLibs.springboot.starter.test) {

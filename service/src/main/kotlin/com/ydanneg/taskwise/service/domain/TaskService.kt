@@ -4,13 +4,18 @@ import com.ydanneg.taskwise.model.Task
 import com.ydanneg.taskwise.model.TaskPriority
 import com.ydanneg.taskwise.model.TaskStatus
 import com.ydanneg.taskwise.service.data.TaskEntity
-import com.ydanneg.taskwise.service.data.TaskRepository
 import com.ydanneg.taskwise.service.web.ServiceException.TaskNotFoundException
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -19,18 +24,25 @@ import java.util.UUID
 
 @Service
 @Transactional(readOnly = true)
-class TaskService(val taskRepository: TaskRepository) {
+class TaskService(
+    val mongoTemplate: ReactiveMongoTemplate
+) {
 
-    suspend fun getAllTasks(pageRequest: Pageable): Page<Task> =
-        taskRepository.findBy(pageRequest)
+    suspend fun getAllTasks(pageRequest: Pageable): Page<Task> {
+        return mongoTemplate.find(Query().with(pageRequest), TaskEntity::class.java)
             .map { it.toModel() }
+            .asFlow()
             .toList()
-            .let { PageImpl(it, pageRequest, taskRepository.count()) }
+            .let { PageImpl(it, pageRequest, mongoTemplate.count(Query(), TaskEntity::class.java).awaitSingle()) }
+    }
 
     suspend fun getTask(taskId: UUID): Task = getOrThrow(taskId).toModel()
 
     @Transactional
-    suspend fun deleteTask(taskId: UUID) = taskRepository.deleteById(taskId)
+    suspend fun deleteTask(taskId: UUID): TaskEntity? {
+        val query = Query(Criteria.where("id").`is`(taskId))
+        return mongoTemplate.findAndRemove(query, TaskEntity::class.java).awaitSingle()
+    }
 
     @Transactional
     suspend fun createTask(
@@ -42,6 +54,7 @@ class TaskService(val taskRepository: TaskRepository) {
         assignedTo: String? = null
     ): Task {
         val entity = TaskEntity(
+            id = UUID.randomUUID(),
             title = title,
             description = description,
             status = TaskStatus.TODO,
@@ -50,7 +63,7 @@ class TaskService(val taskRepository: TaskRepository) {
             assignedTo = assignedTo,
             createdBy = userId
         )
-        return taskRepository.save(entity).toModel()
+        return mongoTemplate.save(entity).awaitSingle().toModel()
     }
 
     @Transactional
@@ -63,11 +76,13 @@ class TaskService(val taskRepository: TaskRepository) {
         }
 
     suspend fun getUserAssignedTasks(userId: String, pageRequest: Pageable): Page<Task> {
-        val total = taskRepository.countByAssignedToOrCreatedBy(userId, userId)
-        return taskRepository.findByAssignedToOrCreatedBy(userId, userId, pageRequest)
+        val assignee = Criteria.where("assignedTo").`is`(userId)
+        val creator = Criteria.where("createdBy").`is`(userId)
+        val query = Query(Criteria().orOperator(assignee, creator)).with(pageRequest)
+        return mongoTemplate.find(query, TaskEntity::class.java).asFlow()
             .map { it.toModel() }
             .toList()
-            .let { PageImpl(it, pageRequest, total) }
+            .let { PageImpl(it, pageRequest, mongoTemplate.count(query, TaskEntity::class.java).awaitSingle()) }
     }
 
     @Transactional
@@ -91,12 +106,12 @@ class TaskService(val taskRepository: TaskRepository) {
         updateTask(taskId) { copy(dueDate = dueDate) }
 
     private suspend fun getOrThrow(taskId: UUID): TaskEntity =
-        taskRepository.findById(taskId) ?: throw TaskNotFoundException(taskId.toString())
+        mongoTemplate.findById(taskId, TaskEntity::class.java).awaitSingleOrNull() ?: throw TaskNotFoundException(taskId.toString())
 
     private suspend fun updateTask(taskId: UUID, update: TaskEntity.() -> TaskEntity): Task {
         return getOrThrow(taskId)
             .update()
-            .let { taskRepository.save(it) }
+            .let { mongoTemplate.save(it).awaitSingle() }
             .toModel()
     }
 

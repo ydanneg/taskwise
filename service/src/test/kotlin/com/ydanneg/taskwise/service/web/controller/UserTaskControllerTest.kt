@@ -5,7 +5,6 @@ import com.ydanneg.taskwise.model.CreateTaskRequest
 import com.ydanneg.taskwise.model.Task
 import com.ydanneg.taskwise.model.TaskPriority.HIGH
 import com.ydanneg.taskwise.model.TaskStatus
-import com.ydanneg.taskwise.service.data.TaskRepository
 import com.ydanneg.taskwise.service.web.V1Constants
 import com.ydanneg.taskwise.service.web.assertGet
 import com.ydanneg.taskwise.service.web.assertPage
@@ -15,13 +14,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 
 @SpringBootIntegrationTest
-class UserTaskControllerTest(@Autowired taskRepository: TaskRepository) : BaseTestContainerTest(taskRepository) {
+class UserTaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : BaseTestContainerTest(mongoTemplate) {
 
     @Autowired
     private lateinit var client: WebTestClient

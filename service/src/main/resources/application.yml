@@ -10,19 +10,28 @@ management:
       base-path: /
 
 spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: tasks
+      uuid-representation: standard
+      username: root
+      password: example
+
   docker:
     compose:
       file: service/docker-compose.yaml
-
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5432/tasks
-    username: dbuser
-    password: dbpassword
-  flyway:
-    enabled: true
-    user: dbuser
-    password: dbpassword
-    url: jdbc:postgresql://localhost:5432/tasks
+#
+#  r2dbc:
+#    url: r2dbc:postgresql://localhost:5432/tasks
+#    username: dbuser
+#    password: dbpassword
+#  flyway:
+#    enabled: true
+#    user: dbuser
+#    password: dbpassword
+#    url: jdbc:postgresql://localhost:5432/tasks
 
 springdoc:
   remove-broken-reference-definitions: false
