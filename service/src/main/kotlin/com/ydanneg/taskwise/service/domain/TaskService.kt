@@ -27,12 +27,11 @@ import java.util.UUID
 class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
 
     suspend fun getAllTasks(pageRequest: Pageable): Page<Task> {
-        val query = Query()
-        return mongoTemplate.find(query.with(pageRequest), TaskEntity::class.java)
+        return mongoTemplate.find(Query().with(pageRequest), TaskEntity::class.java)
             .map { it.toModel() }
             .asFlow()
             .toList()
-            .let { PageImpl(it, pageRequest, mongoTemplate.count(query, TaskEntity::class.java).awaitSingle()) }
+            .let { PageImpl(it, pageRequest, mongoTemplate.count(Query(), TaskEntity::class.java).awaitSingle()) }
     }
 
     suspend fun getTask(taskId: UUID): Task = getOrThrow(taskId).toModel()

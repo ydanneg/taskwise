@@ -14,7 +14,7 @@ spring:
     mongodb:
       host: localhost
       port: 27017
-      database: tasks
+      database: taskwise
       uuid-representation: standard
       username: root
       password: example
@@ -22,16 +22,10 @@ spring:
   docker:
     compose:
       file: service/docker-compose.yaml
-#
-#  r2dbc:
-#    url: r2dbc:postgresql://localhost:5432/tasks
-#    username: dbuser
-#    password: dbpassword
-#  flyway:
-#    enabled: true
-#    user: dbuser
-#    password: dbpassword
-#    url: jdbc:postgresql://localhost:5432/tasks
+      start:
+        command: up
+      stop:
+        command: down
 
 springdoc:
   remove-broken-reference-definitions: false
