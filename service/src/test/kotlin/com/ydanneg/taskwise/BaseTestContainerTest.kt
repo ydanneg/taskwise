@@ -1,7 +1,6 @@
 package com.ydanneg.taskwise
 
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.runBlocking
+import com.ydanneg.taskwise.service.data.TaskEntity
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -14,7 +13,7 @@ abstract class BaseTestContainerTest(private val mongoDbTemplate: ReactiveMongoT
 
     @BeforeEach
     fun setup()  {
-        mongoDbTemplate.dropCollection("task").block()
+        mongoDbTemplate.dropCollection(TaskEntity::class.java).block()
     }
 
     companion object {
