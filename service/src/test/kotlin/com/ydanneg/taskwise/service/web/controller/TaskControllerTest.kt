@@ -13,6 +13,7 @@ import com.ydanneg.taskwise.model.UpdateTaskDueDateRequest
 import com.ydanneg.taskwise.model.UpdateTaskPriorityRequest
 import com.ydanneg.taskwise.model.UpdateTaskStatusRequest
 import com.ydanneg.taskwise.model.UpdateTaskTitleRequest
+import com.ydanneg.taskwise.service.data.TaskEntity
 import com.ydanneg.taskwise.service.data.TaskRepository
 import com.ydanneg.taskwise.service.web.V1Constants
 import com.ydanneg.taskwise.service.web.assertGet
@@ -21,16 +22,23 @@ import com.ydanneg.taskwise.service.web.assertPost
 import com.ydanneg.taskwise.service.web.assertPut
 import com.ydanneg.taskwise.service.web.randomString
 import com.ydanneg.taskwise.test.SpringBootIntegrationTest
+import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import kotlinx.coroutines.test.runTest
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Example
+import org.springframework.data.domain.ExampleMatcher
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers
 import org.springframework.data.domain.Page
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 
+
 @SpringBootIntegrationTest
-class TaskControllerTest(@Autowired taskRepository: TaskRepository) : BaseTestContainerTest(taskRepository) {
+class TaskControllerTest(@Autowired val taskRepository: TaskRepository) : BaseTestContainerTest(taskRepository) {
 
     @Autowired
     private lateinit var client: WebTestClient
@@ -195,9 +203,38 @@ class TaskControllerTest(@Autowired taskRepository: TaskRepository) : BaseTestCo
         }
     }
 
-    private fun createTask(userId: String = UUID.randomUUID().toString(), title: String = randomString(10)): Task =
-        client.assertPost<Task>(V1Constants.userTasksUri(userId), CreateTaskRequest(title)) {
-            expectStatus().isCreated
+    @Test
+    fun `should find all with predicate`() = runTest {
+        createTask(title = "hehe") {
+            it.copy(description = "haha", priority = LOW, assignedTo = "assignee1")
         }
+        createTask {
+            it.copy(priority = HIGH, assignedTo = "assignee1")
+        }
+        val taskEntity = TaskEntity(priority = LOW, assignedTo = "assignee1")
+        val customExampleMatcher = ExampleMatcher.matchingAll()
+            .withMatcher("title", GenericPropertyMatchers.contains().ignoreCase())
+            .withMatcher("description", GenericPropertyMatchers.contains().ignoreCase())
+
+        val example = Example.of(taskEntity, customExampleMatcher)
+        val result = taskRepository.findAll(example).collectList().block()
+
+        result shouldNotBe null
+        result!!.size shouldBe 2
+
+        println(result)
+    }
+
+    private fun createTask(
+        userId: String = UUID.randomUUID().toString(),
+        title: String = randomString(10),
+        block: ((CreateTaskRequest) -> CreateTaskRequest) = { it }
+    ): Task {
+        CreateTaskRequest(title).let(block).let {
+            return client.assertPost<Task>(V1Constants.userTasksUri(userId), it) {
+                expectStatus().isCreated
+            }
+        }
+    }
 
 }

@@ -15,13 +15,13 @@ import java.util.UUID
 data class TaskEntity(
     @Id
     val id: UUID? = null,
-    val title: String,
+    val title: String? = null,
     val description: String? = null,
-    val status: TaskStatus = TaskStatus.TODO,
-    val priority: TaskPriority = TaskPriority.LOW,
+    val status: TaskStatus? = null,
+    val priority: TaskPriority? = null,
     val dueDate: LocalDate? = null,
     val assignedTo: String? = null,
-    val createdBy: String,
+    val createdBy: String? = null,
     @CreatedDate
     val createdAt: Instant? = null,
     @LastModifiedDate

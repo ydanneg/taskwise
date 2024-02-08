@@ -63,4 +63,5 @@ dependencies {
     }
     testImplementation(myLibs.kotlin.test.junit5)
     testImplementation(myLibs.kotlinx.coroutines.core)
+    testImplementation(myLibs.kotlinx.coroutines.test)
 }

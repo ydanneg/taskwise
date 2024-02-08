@@ -101,15 +101,15 @@ class TaskService(val taskRepository: TaskRepository) {
     }
 
     private fun TaskEntity.toModel() = Task(
-        id = id.toString(),
-        title = title,
+        id = id!!.toString(),
+        title = title!!,
         description = description,
-        status = status,
-        priority = priority,
+        status = status!!,
+        priority = priority!!,
         dueDate = dueDate,
         assignedTo = assignedTo,
         createdAt = createdAt!!,
-        createdBy = createdBy,
+        createdBy = createdBy!!,
         completedAt = completedAt
     )
 }
