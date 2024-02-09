@@ -18,6 +18,7 @@ spring:
       uuid-representation: standard
       username: root
       password: example
+      auto-index-creation: true
 
   docker:
     compose:

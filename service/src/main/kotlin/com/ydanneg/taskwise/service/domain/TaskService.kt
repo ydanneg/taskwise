@@ -1,6 +1,7 @@
 package com.ydanneg.taskwise.service.domain
 
 import com.ydanneg.taskwise.model.Task
+import com.ydanneg.taskwise.model.TaskListFilter
 import com.ydanneg.taskwise.model.TaskPriority
 import com.ydanneg.taskwise.model.TaskStatus
 import com.ydanneg.taskwise.service.data.TaskEntity
@@ -26,12 +27,13 @@ import java.util.UUID
 @Transactional(readOnly = true)
 class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
 
-    suspend fun getAllTasks(pageRequest: Pageable): Page<Task> {
-        return mongoTemplate.find(Query().with(pageRequest), TaskEntity::class.java)
-            .map { it.toModel() }
+    suspend fun getAllTasks(filter: TaskListFilter, pageRequest: Pageable): Page<Task> {
+        val query = filter.asQuery()
+        return mongoTemplate.find(Query.of(query).with(pageRequest), TaskEntity::class.java)
             .asFlow()
+            .map { it.toModel() }
             .toList()
-            .let { PageImpl(it, pageRequest, mongoTemplate.count(Query(), TaskEntity::class.java).awaitSingle()) }
+            .let { PageImpl(it, pageRequest, mongoTemplate.count(query, TaskEntity::class.java).awaitSingle()) }
     }
 
     suspend fun getTask(taskId: UUID): Task = getOrThrow(taskId).toModel()
@@ -49,19 +51,16 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
         description: String? = null,
         dueDate: LocalDate? = null,
         assignedTo: String? = null
-    ): Task {
-        val entity = TaskEntity(
-            id = UUID.randomUUID(),
-            title = title,
-            description = description,
-            status = TaskStatus.TODO,
-            priority = priority,
-            dueDate = dueDate,
-            assignedTo = assignedTo,
-            createdBy = userId
-        )
-        return mongoTemplate.save(entity).awaitSingle().toModel()
-    }
+    ): Task = TaskEntity(
+        id = UUID.randomUUID(),
+        title = title,
+        description = description,
+        status = TaskStatus.TODO,
+        priority = priority,
+        dueDate = dueDate,
+        assignedTo = assignedTo,
+        createdBy = userId
+    ).let { mongoTemplate.save(it).awaitSingle().toModel() }
 
     @Transactional
     suspend fun updateTaskStatus(taskId: UUID, status: TaskStatus): Task =
@@ -76,7 +75,8 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
         val assignee = Criteria.where("assignedTo").`is`(userId)
         val creator = Criteria.where("createdBy").`is`(userId)
         val query = Query(Criteria().orOperator(assignee, creator)).with(pageRequest)
-        return mongoTemplate.find(query, TaskEntity::class.java).asFlow()
+        return mongoTemplate.find(query, TaskEntity::class.java)
+            .asFlow()
             .map { it.toModel() }
             .toList()
             .let { PageImpl(it, pageRequest, mongoTemplate.count(query, TaskEntity::class.java).awaitSingle()) }
@@ -110,5 +110,15 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
             .update()
             .let { mongoTemplate.save(it).awaitSingle() }
             .toModel()
+    }
+
+    private fun TaskListFilter.asQuery(): Query {
+        val criteria = Criteria().apply {
+            if (status.isNotEmpty()) and("status").`in`(status)
+            if (priority.isNotEmpty()) and("priority").`in`(priority)
+            if (assignedTo.isNotEmpty()) and("assignedTo").`in`(assignedTo)
+            if (createdBy.isNotEmpty()) and("createdBy").`in`(createdBy)
+        }
+        return Query(criteria)
     }
 }

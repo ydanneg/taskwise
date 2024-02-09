@@ -4,6 +4,7 @@ import com.ydanneg.taskwise.BaseTestContainerTest
 import com.ydanneg.taskwise.model.CreateTaskRequest
 import com.ydanneg.taskwise.model.ErrorDto
 import com.ydanneg.taskwise.model.Task
+import com.ydanneg.taskwise.model.TaskPriority
 import com.ydanneg.taskwise.model.TaskPriority.HIGH
 import com.ydanneg.taskwise.model.TaskPriority.LOW
 import com.ydanneg.taskwise.model.TaskStatus
@@ -83,6 +84,53 @@ class TaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : Base
             expectStatus().isOk
         }.apply {
             assertPage(total)
+        }
+    }
+
+    @Test
+    fun `get all tasks with filter page`() {
+        val user = UUID.randomUUID().toString()
+        val user2 = UUID.randomUUID().toString()
+        for (i in 1..10) {
+            client.assertPost<Task>(V1Constants.userTasksUri(user), CreateTaskRequest("Task #$i", priority = LOW, assignedTo = user)) {
+                expectStatus().isCreated
+            }
+        }
+        for (i in 1..10) {
+            client.assertPost<Task>(V1Constants.userTasksUri(user), CreateTaskRequest("Task #$i", priority = HIGH, assignedTo = user)) {
+                expectStatus().isCreated
+            }
+        }
+        for (i in 1..10) {
+            client.assertPost<Task>(V1Constants.userTasksUri(user), CreateTaskRequest("Task #$i", priority = HIGH, assignedTo = user2)) {
+                expectStatus().isCreated
+            }
+        }
+
+        client.assertGet<Page<Task>>(V1Constants.TASKS, mapOf("priority" to listOf(HIGH.toString()), "assignedTo" to listOf(user))) {
+            expectStatus().isOk
+        }.apply {
+            assertPage(10)
+        }
+        client.assertGet<Page<Task>>(V1Constants.TASKS, mapOf("assignedTo" to listOf(user))) {
+            expectStatus().isOk
+        }.apply {
+            assertPage(20)
+        }
+        client.assertGet<Page<Task>>(V1Constants.TASKS, mapOf("assignedTo" to listOf(user2))) {
+            expectStatus().isOk
+        }.apply {
+            assertPage(10)
+        }
+        client.assertGet<Page<Task>>(V1Constants.TASKS, mapOf("priority" to listOf(HIGH.toString()))) {
+            expectStatus().isOk
+        }.apply {
+            assertPage(20)
+        }
+        client.assertGet<Page<Task>>(V1Constants.TASKS, mapOf("priority" to listOf(TaskPriority.MEDIUM.toString()))) {
+            expectStatus().isOk
+        }.apply {
+            assertPage(0)
         }
     }
 

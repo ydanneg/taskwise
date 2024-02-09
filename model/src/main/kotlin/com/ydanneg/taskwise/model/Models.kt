@@ -71,6 +71,15 @@ enum class TaskPriority {
     LOW, MEDIUM, HIGH
 }
 
+
+@Serializable
+data class TaskListFilter(
+    val status: Set<TaskStatus> = setOf(),
+    val priority: Set<TaskPriority> = setOf(),
+    val assignedTo: Set<String> = setOf(),
+    val createdBy: Set<String> = setOf(),
+)
+
 @Serializable
 data class Task(
     val id: String,
