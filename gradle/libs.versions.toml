@@ -11,14 +11,13 @@ springboot-starter-webflux = { module = "org.springframework.boot:spring-boot-st
 springboot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure" }
 springboot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springboot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
-springboot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
-springboot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 springboot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 springboot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
 springboot-docker-compose = { module = "org.springframework.boot:spring-boot-docker-compose" }
 
 spring-data-commons = { module = "org.springframework.data:spring-data-commons" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test" }
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" }
 
 springdoc-openapi-webflux-ui = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }

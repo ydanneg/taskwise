@@ -29,7 +29,7 @@ data class TaskEntity(
     @Indexed
     val dueDate: LocalDate? = null,
     @Indexed
-    val assignedTo: String? = null,
+    val assignee: String? = null,
     @Indexed
     val createdBy: String,
     @CreatedDate

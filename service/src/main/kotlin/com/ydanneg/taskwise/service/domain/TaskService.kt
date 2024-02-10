@@ -50,7 +50,7 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
         priority: TaskPriority = TaskPriority.LOW,
         description: String? = null,
         dueDate: LocalDate? = null,
-        assignedTo: String? = null
+        assignee: String? = null
     ): Task = TaskEntity(
         id = UUID.randomUUID(),
         title = title,
@@ -58,7 +58,7 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
         status = TaskStatus.TODO,
         priority = priority,
         dueDate = dueDate,
-        assignedTo = assignedTo,
+        assignee = assignee,
         createdBy = userId
     ).let { mongoTemplate.save(it).awaitSingle().toModel() }
 
@@ -66,21 +66,10 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
     suspend fun updateTaskStatus(taskId: UUID, status: TaskStatus): Task =
         updateTask(taskId) {
             copy(status = status).let {
-                if (status == TaskStatus.COMPLETED) it.copy(completedAt = Instant.now())
+                if (status == TaskStatus.DONE) it.copy(completedAt = Instant.now())
                 else it.copy(completedAt = null)
             }
         }
-
-    suspend fun getUserAssignedTasks(userId: String, pageRequest: Pageable): Page<Task> {
-        val assignee = Criteria.where("assignedTo").`is`(userId)
-        val creator = Criteria.where("createdBy").`is`(userId)
-        val query = Query(Criteria().orOperator(assignee, creator)).with(pageRequest)
-        return mongoTemplate.find(query, TaskEntity::class.java)
-            .asFlow()
-            .map { it.toModel() }
-            .toList()
-            .let { PageImpl(it, pageRequest, mongoTemplate.count(query, TaskEntity::class.java).awaitSingle()) }
-    }
 
     @Transactional
     suspend fun updateTaskTitle(taskId: UUID, title: String): Task =
@@ -96,7 +85,7 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
 
     @Transactional
     suspend fun updateTaskAssignee(taskId: UUID, assignee: String?): Task =
-        updateTask(taskId) { copy(assignedTo = assignee) }
+        updateTask(taskId) { copy(assignee = assignee) }
 
     @Transactional
     suspend fun updateTaskDueDate(taskId: UUID, dueDate: LocalDate?): Task =
@@ -116,7 +105,7 @@ class TaskService(val mongoTemplate: ReactiveMongoTemplate) {
         val criteria = Criteria().apply {
             if (status.isNotEmpty()) and("status").`in`(status)
             if (priority.isNotEmpty()) and("priority").`in`(priority)
-            if (assignedTo.isNotEmpty()) and("assignedTo").`in`(assignedTo)
+            if (assignee.isNotEmpty()) and("assignee").`in`(assignee)
             if (createdBy.isNotEmpty()) and("createdBy").`in`(createdBy)
         }
         return Query(criteria)

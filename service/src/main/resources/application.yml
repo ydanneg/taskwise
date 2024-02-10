@@ -60,4 +60,8 @@ logging:
   level:
     root: INFO
     com.ydanneg: DEBUG
+    org:
+      springframework:
+        data:
+          mongodb: DEBUG
 

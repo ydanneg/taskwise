@@ -10,6 +10,8 @@ import com.ydanneg.taskwise.model.UpdateTaskStatusRequest
 import com.ydanneg.taskwise.model.UpdateTaskTitleRequest
 import com.ydanneg.taskwise.service.domain.TaskService
 import com.ydanneg.taskwise.service.web.V1Constants
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
@@ -23,22 +25,24 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
 @RequestMapping(V1Constants.TASKS)
+@Tag(name = "Tasks", description = "Task operations")
 class TaskController(private val taskService: TaskService) {
 
     @GetMapping("/{taskId}")
     @ResponseStatus(OK)
+    @Operation(summary = "Get a task by id")
     suspend fun getTask(@PathVariable taskId: String): Task =
         taskService.getTask(UUID.fromString(taskId))
 
     @PutMapping("/{taskId}/status")
     @ResponseStatus(OK)
+    @Operation(summary = "Update the status of a task. Completed status adds a completion date.")
     suspend fun updateTaskStatus(
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskStatusRequest
@@ -46,6 +50,7 @@ class TaskController(private val taskService: TaskService) {
 
     @PutMapping("/{taskId}/priority")
     @ResponseStatus(OK)
+    @Operation(summary = "Update the priority of a task")
     suspend fun updateTaskPriority(
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskPriorityRequest
@@ -53,6 +58,7 @@ class TaskController(private val taskService: TaskService) {
 
     @PutMapping("/{taskId}/title")
     @ResponseStatus(OK)
+    @Operation(summary = "Update the title of a task")
     suspend fun updateTaskTitle(
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskTitleRequest
@@ -60,6 +66,7 @@ class TaskController(private val taskService: TaskService) {
 
     @PutMapping("/{taskId}/description")
     @ResponseStatus(OK)
+    @Operation(summary = "Update the description of a task")
     suspend fun updateTaskDescription(
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskDescriptionRequest
@@ -67,6 +74,7 @@ class TaskController(private val taskService: TaskService) {
 
     @PutMapping("/{taskId}/assignee")
     @ResponseStatus(OK)
+    @Operation(summary = "Update the assignee of a task")
     suspend fun updateTaskAssignee(
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskAssigneeRequest
@@ -74,6 +82,7 @@ class TaskController(private val taskService: TaskService) {
 
     @PutMapping("/{taskId}/due-date")
     @ResponseStatus(OK)
+    @Operation(summary = "Update the due date of a task")
     suspend fun updateTaskDueDate(
         @PathVariable taskId: String,
         @Valid @RequestBody request: UpdateTaskDueDateRequest
@@ -82,12 +91,14 @@ class TaskController(private val taskService: TaskService) {
 
     @GetMapping
     @ResponseStatus(OK)
+    @Operation(summary = "Get all tasks with optional filtering and pagination")
     suspend fun getAllTasks(
-        filter: TaskListFilter = TaskListFilter(),
+        @ParameterObject @Valid filter: TaskListFilter = TaskListFilter(),
         @ParameterObject @PageableDefault(size = V1Constants.DEFAULT_PAGE_SIZE, page = 0) pageRequest: Pageable
     ): Page<Task> = taskService.getAllTasks(filter, pageRequest)
 
     @DeleteMapping("/{taskId}")
     @ResponseStatus(NO_CONTENT)
+    @Operation(summary = "Delete a task by id")
     suspend fun deleteTask(@PathVariable taskId: UUID) = taskService.deleteTask(taskId)
 }

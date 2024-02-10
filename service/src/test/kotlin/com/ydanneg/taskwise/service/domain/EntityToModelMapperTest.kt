@@ -18,13 +18,14 @@ class EntityToModelMapperTest {
             id = UUID.randomUUID(),
             title = "title",
             description = "description",
-            status = TaskStatus.COMPLETED,
+            status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
             dueDate = LocalDate.now(),
-            assignedTo = "assignedTo",
+            assignee = "assignee",
             createdAt = Instant.now(),
             createdBy = "createdBy",
-            completedAt = Instant.now()
+            completedAt = Instant.now(),
+            version = 1
         )
 
         // when
@@ -37,9 +38,10 @@ class EntityToModelMapperTest {
         model.status shouldBe entity.status
         model.priority shouldBe entity.priority
         model.dueDate shouldBe entity.dueDate
-        model.assignedTo shouldBe entity.assignedTo
+        model.assignee shouldBe entity.assignee
         model.createdAt shouldBe entity.createdAt!!
         model.createdBy shouldBe entity.createdBy
         model.completedAt shouldBe entity.completedAt
+        model.version shouldBe entity.version!!
     }
 }

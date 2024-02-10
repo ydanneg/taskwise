@@ -4,6 +4,7 @@ object V1Constants {
     const val DEFAULT_PAGE_SIZE = 20
 
     const val TASKS = "/v1/tasks"
+    const val REPORTS = "/v1/reports"
     const val USER_TASKS = "/v1/users/{userId}/tasks"
 
     fun userTasksUri(userId: String) = USER_TASKS.replace("{userId}", userId)

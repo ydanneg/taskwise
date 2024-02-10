@@ -1,5 +1,9 @@
 package com.ydanneg.taskwise.service.web
 
+import com.ydanneg.taskwise.model.CreateTaskRequest
+import com.ydanneg.taskwise.model.Task
+import com.ydanneg.taskwise.model.TaskStatus
+import com.ydanneg.taskwise.model.UpdateTaskStatusRequest
 import io.kotest.matchers.shouldBe
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.data.domain.Page
@@ -8,6 +12,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
+import java.util.UUID
 import kotlin.math.ceil
 
 inline fun <reified T> WebTestClient.assertPost(uri: String, request: Any, block: ResponseSpec.() -> Unit): T {
@@ -61,3 +66,20 @@ fun Page<*>.assertPage(total: Int) {
     size shouldBe V1Constants.DEFAULT_PAGE_SIZE
     content.size shouldBe total.coerceAtMost(V1Constants.DEFAULT_PAGE_SIZE)
 }
+
+
+fun WebTestClient.createAssignedTask(userId: String = UUID.randomUUID().toString(), title: String = randomString(10), status: TaskStatus? = null): Task {
+    val task = assertPost<Task>(V1Constants.userTasksUri(userId), CreateTaskRequest(title, assignee = userId)) {
+        expectStatus().isCreated
+    }
+    return if (status != null) {
+        assertPut<Task>(V1Constants.taskStatusUri(task.id), UpdateTaskStatusRequest(status)) {
+            expectStatus().isOk
+        }
+    } else task
+}
+
+fun WebTestClient.createTask(userId: String = UUID.randomUUID().toString(), title: String = randomString(10)): Task =
+    assertPost<Task>(V1Constants.userTasksUri(userId), CreateTaskRequest(title)) {
+        expectStatus().isCreated
+    }

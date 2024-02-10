@@ -1,16 +1,30 @@
 ### Create a new task
-POST http://localhost:8080/v1/users/ydanneg/tasks
+POST http://localhost:8080/v1/users/{{user}}/tasks
 Content-Type: application/json
 Accept: application/json
 
 {
-  "title": "Task #3",
-  "description": "Description of a task",
+  "title": "{{$random.alphabetic(10)}}",
+  "description": "{{$random.alphanumeric(100)}}",
   "dueDate": "2024-02-06",
   "priority": "LOW",
-  "assignedTo": "ydanneg"
+  "assignee": "{{assignee}}"
 }
 
-### Get task by ID
-GET http://localhost:8080/v1/users/ydanneg/tasks
+> {%
+    client.global.set("taskId", response.body.id);
+%}
+
+### Update status
+PUT http://localhost:8080/v1/tasks/{{taskId}}/status
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "DONE"
+}
+
+
+### Get all user tasks
+GET http://localhost:8080/v1/users/{{user}}/tasks
 Accept: application/json

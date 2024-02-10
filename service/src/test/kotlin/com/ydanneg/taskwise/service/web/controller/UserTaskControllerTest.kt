@@ -6,14 +6,11 @@ import com.ydanneg.taskwise.model.Task
 import com.ydanneg.taskwise.model.TaskPriority.HIGH
 import com.ydanneg.taskwise.model.TaskStatus
 import com.ydanneg.taskwise.service.web.V1Constants
-import com.ydanneg.taskwise.service.web.assertGet
-import com.ydanneg.taskwise.service.web.assertPage
 import com.ydanneg.taskwise.service.web.assertPost
 import com.ydanneg.taskwise.test.SpringBootIntegrationTest
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
@@ -40,7 +37,7 @@ class UserTaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : 
             priority shouldBe request.priority
             status shouldBe TaskStatus.TODO
             dueDate shouldBe request.dueDate
-            assignedTo shouldBe request.assignedTo
+            assignee shouldBe request.assignee
             createdBy shouldBe userId
             createdAt shouldNotBe null
             completedAt shouldBe null
@@ -55,7 +52,7 @@ class UserTaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : 
             description = "Description #1",
             dueDate = LocalDate.now(),
             priority = HIGH,
-            assignedTo = "assignee1"
+            assignee = "assignee1"
         )
 
         client.assertPost<Task>(V1Constants.userTasksUri(userId), request) {
@@ -67,29 +64,10 @@ class UserTaskControllerTest(@Autowired mongoTemplate: ReactiveMongoTemplate) : 
             priority shouldBe request.priority
             status shouldBe TaskStatus.TODO
             dueDate shouldBe request.dueDate
-            assignedTo shouldBe request.assignedTo
+            assignee shouldBe request.assignee
             createdBy shouldBe userId
             createdAt shouldNotBe null
             completedAt shouldBe null
         }
     }
-
-    @Test
-    fun `should return all user tasks by page`() {
-        val userId = UUID.randomUUID().toString()
-        val total = 10
-        for (i in 1..total) {
-            client.assertPost<Task>(V1Constants.userTasksUri(userId), CreateTaskRequest("Task #$i", assignedTo = userId)) {
-                expectStatus().isCreated
-            }
-        }
-
-        client.assertGet<Page<Task>>(V1Constants.userTasksUri(userId)) {
-            expectStatus().isOk
-        }.apply {
-            assertPage(total)
-        }
-
-    }
-
 }

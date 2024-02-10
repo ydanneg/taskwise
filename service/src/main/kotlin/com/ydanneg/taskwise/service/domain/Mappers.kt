@@ -11,8 +11,9 @@ fun TaskEntity.toModel() = Task(
     status = status,
     priority = priority,
     dueDate = dueDate,
-    assignedTo = assignedTo,
+    assignee = assignee,
     createdAt = createdAt!!,
     createdBy = createdBy,
-    completedAt = completedAt
+    completedAt = completedAt,
+    version = version!!
 )
